@@ -9,3 +9,6 @@ airflow dags backfill my_dag --reset-dagrun --rerun-failed-tasks --run-backwards
 airflow dags reserialize
 airflow dags list
 airflow tasks test my_dag my task 2025-05-10
+
+# Test tasks
+astro dev run tasks test stock_market is_api_available 2025-01-01
