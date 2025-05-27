@@ -1,5 +1,6 @@
 astro dev init
 astro dev start
+astro dev stop
 airflow db check
 airflow db clean
 airflow db export-archived

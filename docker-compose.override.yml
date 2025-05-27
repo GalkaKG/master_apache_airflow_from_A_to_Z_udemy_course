@@ -1,18 +1,4 @@
-version: "3.1"
 services:
-
-  webserver:
-    networks:
-      - ndsnet
-
-  scheduler:
-    networks:
-      - ndsnet
-
-  triggerer:
-    networks:
-      - ndsnet
-
   minio:
     image: minio/minio:RELEASE.2024-06-13T22-53-53Z
     container_name: minio
