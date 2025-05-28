@@ -7,10 +7,14 @@ airflow db check
 airflow db clean
 airflow db export-archived
 airflow db init  # automaticly done with astro
+
 airflow dags backfill my_dag --reset-dagrun --rerun-failed-tasks --run-backwards -s 2025-01-01 -e 2025-05-30
 airflow dags reserialize
 airflow dags list
 airflow tasks test my_dag my task 2025-05-10
+
+docker build -t airflow/spark-worker .
+docker build -t airflow/spark-master .
 
 # Test tasks
 astro dev run tasks test stock_market is_api_available 2025-01-01

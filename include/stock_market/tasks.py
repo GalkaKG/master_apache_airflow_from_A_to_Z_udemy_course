@@ -2,6 +2,19 @@ from airflow.hooks.base import BaseHook
 import json
 from minio import Minio
 from io import BytesIO
+from airflow.exceptions import AirflowNotFoundException
+
+BUCKET_NAME = 'stock-market'
+
+def _get_minio_client():
+    minio = BaseHook.get_connection('minio')
+    client = Minio(
+        endpoint=minio.extra_dejson['endpoint_url'].split('//')[1],
+        access_key=minio.login,
+        secret_key=minio.password,
+        secure=False
+    )
+    return client
 
 def _get_stock_prices(url, symbol):
     import requests
@@ -12,17 +25,8 @@ def _get_stock_prices(url, symbol):
     return json.dumps(response.json()['chart']['result'][0])
 
 def _store_prices(stock):
-    minio = BaseHook.get_connection('minio')
-    client = Minio(
-        endpoint=minio.extra_dejson['endpoint_url'].split('//')[1],
-        access_key=minio.login,
-        secret_key=minio.password,
-        # endpoint="minio:9000",
-        # access_key="minio",
-        # secret_key="minio123",
-        secure=False
-    )
-    bucket_name = 'stock-market'
+    client = _get_minio_client()
+    bucket_name = BUCKET_NAME
     if not client.bucket_exists(bucket_name):
         client.make_bucket(bucket_name)
     stock = json.loads(stock)
@@ -36,3 +40,11 @@ def _store_prices(stock):
     )
     return f'{objw.bucket_name}/{symbol}'
     
+def _get_formatted_csv(path):
+    client = _get_minio_client()
+    prefix_path = f"{path.split('/')[1]}/formatted_prices.csv"
+    objects = client.list_objects(BUCKET_NAME, prefix=prefix_path, recursive=True)
+    for obj in objects:
+        if obj.object_name.endswith('.csv'):
+            return obj.object_name
+    return AirflowNotFoundException(f"The csv file does not exist")
