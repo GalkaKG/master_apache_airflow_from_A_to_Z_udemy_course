@@ -20,6 +20,7 @@ services:
       retries: 3
     networks:
       - ndsnet
+      # - master-apache-airflow-from-a-to-z-udemy-course_02cf0f_airflow
   
   spark-master:
     image: airflow/spark-master
@@ -69,3 +70,5 @@ services:
 networks:
   ndsnet:
     driver: bridge
+  # master-apache-airflow-from-a-to-z-udemy-course_02cf0f_airflow:
+  #   external: true

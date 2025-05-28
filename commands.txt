@@ -1,6 +1,8 @@
 astro dev init
 astro dev start
 astro dev stop
+astro dev restart
+
 airflow db check
 airflow db clean
 airflow db export-archived
@@ -12,3 +14,4 @@ airflow tasks test my_dag my task 2025-05-10
 
 # Test tasks
 astro dev run tasks test stock_market is_api_available 2025-01-01
+astro dev run dags test stock_market 2025-01-01
