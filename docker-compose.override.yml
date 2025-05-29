@@ -1,4 +1,18 @@
+version: "3.1"
 services:
+
+  webserver:
+    networks:
+      - ndsnet
+
+  scheduler:
+    networks:
+      - ndsnet
+
+  triggerer:
+    networks:
+      - ndsnet
+
   minio:
     image: minio/minio:RELEASE.2024-06-13T22-53-53Z
     container_name: minio
@@ -20,7 +34,6 @@ services:
       retries: 3
     networks:
       - ndsnet
-      # - master-apache-airflow-from-a-to-z-udemy-course_02cf0f_airflow
   
   spark-master:
     image: airflow/spark-master
@@ -70,5 +83,3 @@ services:
 networks:
   ndsnet:
     driver: bridge
-  # master-apache-airflow-from-a-to-z-udemy-course_02cf0f_airflow:
-  #   external: true

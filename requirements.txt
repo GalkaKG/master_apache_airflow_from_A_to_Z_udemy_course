@@ -3,3 +3,6 @@ apache-airflow-providers-http
 apache-airflow-providers-amazon
 minio
 apache-airflow-providers-docker
+astro-sdk-python[amazon,snowflake]
+
+astro-run-dag # This package is needed for the astro run command. It will be removed before a deploy
