@@ -1,9 +1,10 @@
-from airflow.decorators import dag
+from airflow.decorators import dag, task, task_group
 from airflow.operators.python import PythonOperator
 from pendulum import datetime, duration
 from include.datasets import DATASET_COCKTAIL
-from include.tasks import _get_cocktail, _check_size
+from include.tasks import _get_cocktail, _check_size, _validate_cocktail_fields
 from include.extractor.callbacks import _handle_failed_dag_run, _handle_empty_size
+import json
 
 
 @dag(
@@ -27,15 +28,44 @@ def extractor():
         max_retry_delay=duration(minutes=15)
     )
 
-    check_size = PythonOperator(
-        task_id='check_size',
-        python_callable=_check_size,
-        on_failure_callback=_handle_empty_size,
-    )
+    @task_group
+    def checks():
 
-    get_cocktail >> check_size
+        check_size = PythonOperator(
+            task_id='check_size',
+            python_callable=_check_size,
+            on_failure_callback=_handle_empty_size,
+        )
+
+        validate_fields = PythonOperator(
+            task_id='validate_fields',
+            python_callable=_validate_cocktail_fields
+        ) 
+
+        check_size >> validate_fields
+
+    # def store_value(ti=None):
+    #     ti.xcom_pull(task_ids="checks.validate_fields")
+
+    @task.branch()
+    def branch_cocktail_type():
+        with open(DATASET_COCKTAIL.uri, 'r') as f:
+            data = json.load(f)
+        if data['drinks'][0]['strAlcoholic'] == 'Alcoholic':
+            return 'alcoholic_cocktail'
+        return 'non_alcoholic_cocktail'
+    
+    @task()
+    def alcoholic_cocktail():
+        print('Alcoholic cocktail found!')
+
+    @task()
+    def non_alcoholic_cocktail():
+        print('Non-alcoholic cocktail found!')
+
+    get_cocktail >> checks() >> branch_cocktail_type() >> [alcoholic_cocktail(), non_alcoholic_cocktail()]
     
 my_extractor = extractor()
 
 if __name__ == "__main__":
-    my_extractor.test()  # For local testing, allows running the DAG from the command line
+    my_extractor.test()  
