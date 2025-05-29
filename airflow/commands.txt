@@ -19,3 +19,10 @@ docker build -t airflow/spark-master .
 # Test tasks
 astro dev run tasks test stock_market is_api_available 2025-01-01
 astro dev run dags test stock_market 2025-01-01
+
+astro dev parse
+astro dev pytest
+astro dev upgrade-test
+
+airflow dags test
+airflow tasks test
