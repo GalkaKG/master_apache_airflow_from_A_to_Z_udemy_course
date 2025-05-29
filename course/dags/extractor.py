@@ -5,6 +5,7 @@ from include.datasets import DATASET_COCKTAIL
 from include.tasks import _get_cocktail, _check_size, _validate_cocktail_fields
 from include.extractor.callbacks import _handle_failed_dag_run, _handle_empty_size
 import json
+from airflow.utils.trigger_rule import TriggerRule
 
 
 @dag(
@@ -63,7 +64,15 @@ def extractor():
     def non_alcoholic_cocktail():
         print('Non-alcoholic cocktail found!')
 
-    get_cocktail >> checks() >> branch_cocktail_type() >> [alcoholic_cocktail(), non_alcoholic_cocktail()]
+    @task(trigger_rule=TriggerRule.NONE_FAILED_MIN_ONE_SUCCESS)
+    def clean_data():
+        import os
+        if os.path.exists(DATASET_COCKTAIL.uri):
+            os.remove(DATASET_COCKTAIL.uri)
+        else:
+            print(f"{DATASET_COCKTAIL.uri} does not exist")
+
+    get_cocktail >> checks() >> branch_cocktail_type() >> [alcoholic_cocktail(), non_alcoholic_cocktail()] >> clean_data()
     
 my_extractor = extractor()
 
