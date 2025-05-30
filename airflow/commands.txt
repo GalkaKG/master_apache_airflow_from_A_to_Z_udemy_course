@@ -26,3 +26,6 @@ astro dev upgrade-test
 
 airflow dags test
 airflow tasks test
+
+# Create variables
+astro dev run variables set my_number 42
