@@ -1,0 +1,11 @@
+kubectl get nodes
+helm repo add apache-airflow https://airflow.apache.org
+helm repo update
+ 
+kubectl create namespace airflow
+kubectl get namespaces
+
+helm install airflow apache-airflow/airflow --namespace airflow --debug
+kubectl get pods -n airflow
+
+kubectl port-forward svc/airflow-webserver 8080:8080 --namespace airflow
